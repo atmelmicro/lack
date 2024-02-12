@@ -1,0 +1,15 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.9.1",
+    "aws-cdk-lib": "^2.127.0",
+    "better-sqlite3": "^9.4.0",
+    "drizzle-orm": "^0.29.3",
+    "esbuild": "^0.20.0",
+    "prisma": "^5.9.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.5"
+  }
+}
