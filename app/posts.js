@@ -11,6 +11,12 @@ export async function put$update() {
 }
 
 export async function test__plink__$id__a__$id2(event) {
-  console.log(event);
-  return { body: { a: "b" }, statusCode: 200 };
+  return {
+    body: JSON.stringify({
+      params: event.pathParameters,
+      search: event.queryStringParameters,
+    }),
+    statusCode: 200,
+    headers: { "content-type": "application/json" },
+  };
 }

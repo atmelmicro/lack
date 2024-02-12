@@ -15,6 +15,13 @@ import {
 import { getAllRoutes } from "./utils";
 import { join } from "path";
 
+const methods = {
+  get: aws_apigatewayv2.HttpMethod.GET,
+  post: aws_apigatewayv2.HttpMethod.POST,
+  delete: aws_apigatewayv2.HttpMethod.DELETE,
+  put: aws_apigatewayv2.HttpMethod.PUT,
+};
+
 async function deploy() {
   const app = new App();
   const stack = new Stack(app, "llrt-example", {
@@ -33,7 +40,8 @@ async function deploy() {
     name: string,
     path: string,
     func: string,
-    routePath: string
+    routePath: string,
+    method: string
   ) => {
     const lambda = new aws_lambda.Function(stack, name, {
       functionName: name,
@@ -52,19 +60,7 @@ async function deploy() {
 
     new aws_apigatewayv2.HttpRoute(stack, `${lambda.node.id}Route`, {
       httpApi,
-      routeKey: aws_apigatewayv2.HttpRouteKey.with(
-        routePath,
-        aws_apigatewayv2.HttpMethod.ANY
-      ),
-      integration,
-    });
-
-    new aws_apigatewayv2.HttpRoute(stack, `${lambda.node.id}ProxyRoute`, {
-      httpApi,
-      routeKey: aws_apigatewayv2.HttpRouteKey.with(
-        `${routePath}/{proxy+}`,
-        aws_apigatewayv2.HttpMethod.ANY
-      ),
+      routeKey: aws_apigatewayv2.HttpRouteKey.with(routePath, methods[method]),
       integration,
     });
 
@@ -110,7 +106,8 @@ async function deploy() {
       route.lambdaMatcher.replaceAll("/", "__").replaceAll(/{|}/gi, "-"),
       join("./lambda", route.path),
       route.func,
-      route.lambdaMatcher
+      route.lambdaMatcher,
+      route.method
     );
   }
 
@@ -120,8 +117,7 @@ async function deploy() {
     });
   }
 
-  const route = "/llrt";
-  const id = route.substring(1).replace(/-\//g, "");
+  const id = "Lac";
   const distribution = new aws_cloudfront.Distribution(
     stack,
     `${id}Distribution`,
@@ -129,8 +125,9 @@ async function deploy() {
       defaultBehavior: {
         origin: new aws_cloudfront_origins.HttpOrigin(httpEndpointNoProto, {
           protocolPolicy: aws_cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
-          originPath: route,
         }),
+        originRequestPolicy:
+          aws_cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
         allowedMethods: aws_cloudfront.AllowedMethods.ALLOW_ALL,
         cachePolicy: aws_cloudfront.CachePolicy.CACHING_DISABLED,
       },
