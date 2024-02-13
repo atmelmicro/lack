@@ -1,5 +1,5 @@
 import { build } from "./build";
-import { getAllRoutes, splitRoute } from "./utils";
+import { getAllRoutes } from "./utils";
 
 const routes = await getAllRoutes();
 console.log("starting dev server with the routes");
@@ -36,12 +36,6 @@ Bun.serve({
     const module = await import(path.file);
     const res = await module[path.func](event);
     let { body, headers } = res;
-
-    if (typeof body === "object") {
-      body = JSON.stringify(body);
-      if (!headers) headers = {}; // init if headers arent provided
-      headers["content-type"] = "application/json";
-    }
 
     return new Response(body, {
       status: res.statusCode ?? 200,

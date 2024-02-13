@@ -9,7 +9,6 @@ import {
   aws_cloudfront,
   aws_cloudfront_origins,
   aws_lambda,
-  aws_lambda_nodejs,
   aws_logs,
 } from "aws-cdk-lib";
 import { getAllRoutes } from "./utils";
@@ -30,6 +29,16 @@ async function deploy() {
     },
   });
 
+  const userCdk = await import("./lac.config");
+  const method = userCdk["cdk"];
+  let userObject:
+    | undefined
+    | {
+        env: Record<string, string>;
+        post: (lambdas: aws_lambda.Function[]) => Promise<void>;
+      };
+  method && (userObject = method(stack));
+
   const httpApi = new aws_apigatewayv2.HttpApi(stack, `HttpApi`, {
     disableExecuteApiEndpoint: false,
     corsPreflight: undefined,
@@ -48,7 +57,7 @@ async function deploy() {
       code: aws_lambda.Code.fromAsset(path),
       ...props,
       handler: `index.${func}`,
-      environment: {},
+      environment: props.environment,
       runtime: aws_lambda.Runtime.PROVIDED_AL2,
       layers: [llrtLayer],
     });
@@ -65,6 +74,7 @@ async function deploy() {
     });
 
     routePaths.push(routePath);
+    return lambda;
   };
 
   const httpEndpointNoProto = Fn.select(
@@ -84,31 +94,26 @@ async function deploy() {
     compatibleArchitectures: [aws_lambda.Architecture.ARM_64],
   });
 
-  const props = {
+  const props: Partial<aws_lambda.FunctionProps> = {
     runtime: aws_lambda.Runtime.NODEJS_20_X,
     memorySize: 128,
     timeout: Duration.seconds(60),
-    bundling: {
-      format: aws_lambda_nodejs.OutputFormat.ESM,
-      banner:
-        "import {createRequire} from 'module';const require=createRequire(import.meta.url);",
-      minify: true,
-      sourceMap: true,
-    },
     architecture: aws_lambda.Architecture.ARM_64,
     logRetention: aws_logs.RetentionDays.ONE_DAY,
+    environment: userObject?.env,
   };
 
   const routes = await getAllRoutes();
+  const lambdas: aws_lambda.Function[] = [];
   for (const route of routes) {
-    console.log(route);
-    addRoute(
+    const lambda = addRoute(
       route.lambdaMatcher.replaceAll("/", "__").replaceAll(/{|}/gi, "-"),
       join("./lambda", route.path),
       route.func,
       route.lambdaMatcher,
       route.method
     );
+    lambdas.push(lambda);
   }
 
   for (const [i, route] of routePaths.entries()) {
@@ -137,6 +142,8 @@ async function deploy() {
   new CfnOutput(stack, `DistributionOutput${id}`, {
     value: distribution.distributionDomainName,
   });
+
+  if (userObject?.post) await userObject.post(lambdas);
 }
 
 deploy();

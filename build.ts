@@ -24,6 +24,7 @@ export async function build() {
     target: "es2020",
     format: "esm",
     minify: true,
+    external: ["@aws-sdk"],
   });
 }
 
