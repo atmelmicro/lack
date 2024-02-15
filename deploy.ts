@@ -108,7 +108,7 @@ async function deploy() {
   for (const route of routes) {
     const lambda = addRoute(
       route.lambdaMatcher.replaceAll("/", "__").replaceAll(/{|}/gi, "-"),
-      join("./lambda", route.path),
+      join("./out/lambda", route.path),
       route.func,
       route.lambdaMatcher,
       route.method

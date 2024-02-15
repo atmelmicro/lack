@@ -33,7 +33,6 @@ function removeMethod(funcName: string) {
 function cleanUpRoute(route: string) {
   const hasMethod =
     Object.keys(methods).find((x) => route.slice(0, 4) === x) !== undefined;
-  console.log(route.slice(0, 4));
   if (hasMethod) route = route.slice(4);
   if (route.endsWith("$index")) route = route.slice(0, -6);
   return route.replaceAll("__", "/");
@@ -41,7 +40,6 @@ function cleanUpRoute(route: string) {
 
 export function splitRoute(route: string) {
   const clean = cleanUpRoute(route);
-  console.log(clean);
   const split = clean
     .split("/")
     .map((x) => x.split(/(?=\$)/))
@@ -58,7 +56,6 @@ function createMatcher(route: string) {
       return x;
     })
     .join("/");
-  console.log("aa - /" + path, " -- ", split);
   return new RegExp("/" + path);
 }
 
@@ -80,7 +77,7 @@ function paramLocations(route: string) {
 }
 
 export async function getAllRoutes() {
-  const entries = await getAllEntryPoint("./out");
+  const entries = await getAllEntryPoint("./out/build");
   return (
     await Promise.all(
       entries.map((file) =>

@@ -1,5 +1,5 @@
 export function json(
-  data: object,
+  data?: object,
   params?: { headers?: Record<string, string>; statusCode?: number }
 ) {
   const statusCode = params?.statusCode ?? 200;
