@@ -26,8 +26,7 @@ const random = () =>
 
 export async function deploy() {
   const app = new App();
-  // @ts-expect-error
-  const userCdk = await import("./lack.config.js");
+  const userCdk = await import(join(process.cwd(), "./lack.config.js"));
   const stackName = userCdk.name;
   const stack = new Stack(app, stackName, {
     env: {
@@ -155,5 +154,3 @@ export async function deploy() {
 
   return stack;
 }
-
-deploy();
