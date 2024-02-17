@@ -22,6 +22,7 @@ jobs:
           scope: "@atmelmicro"
       - run: bun i
       - run: bun run build
+      - run: bun test
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
