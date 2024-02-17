@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "lack-cli",
+  "name": "@atmelmicro/lack-cli",
   "version": "0.1.0",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.511.0",
@@ -23,6 +23,6 @@
     "build": "bun run src/build_cli.ts"
   },
   "bin": {
-    "lack": "./build/cli.js"
+    "lack": "build/cli.js"
   }
 }
