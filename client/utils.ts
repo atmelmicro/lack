@@ -1,3 +1,4 @@
+/** Helper function to return json from a function. */
 export function json(
   data?: object,
   params?: { headers?: Record<string, string>; statusCode?: number }
