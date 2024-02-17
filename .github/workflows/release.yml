@@ -4,19 +4,6 @@ on:
   release:
     types: [published]
 
-jobs:
-  bump:
-    name: bump
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: bump version
-        uses: "phips28/gh-action-bump-version@master"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   deploy:
     name: deploy
     runs-on: ubuntu-latest
