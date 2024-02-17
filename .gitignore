@@ -5,3 +5,4 @@ cdk.out/
 out/
 lambda/
 deploy.js
+cli.js
