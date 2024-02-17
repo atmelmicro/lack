@@ -1,22 +1,12 @@
-name: my-workflow
+name: deploy-workflow
 
 on:
-  push:
-  pull_request:
+  release:
+    types: [published]
 
 jobs:
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
-      - run: bun i
-      - run: bun test
   deploy:
     name: deploy
-    needs: test
-    if: ${{ success() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
