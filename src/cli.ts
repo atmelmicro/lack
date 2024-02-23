@@ -2,6 +2,8 @@ import { bundleAll } from "./build";
 import { deploy as cdkDeploy } from "./deploy";
 import { argv } from "node:process";
 import { startDev } from "./dev";
+import { spawn } from "node:child_process";
+import { writeFile, mkdir } from "node:fs/promises";
 
 const commands = [
   {
@@ -23,7 +25,62 @@ const commands = [
     props: [],
     fn: startDev,
   },
+  {
+    title: "create",
+    props: [],
+    fn: newApp,
+  },
 ];
+
+const sampleConfig = `export const name = "example-app"
+export const llrt = "./llrt.zip"
+`;
+
+const sampleGitignore = `./llrt.zip
+out/
+node_modules/`;
+
+async function newApp() {
+  const log = (text: string) => {
+    console.log(color(" Create ", "Gray"), text);
+  };
+
+  log("creating new lack app");
+  log("initing npm");
+  spawn("npm", ["init -y"]);
+
+  log("downloading llrt");
+  const repoRes = await fetch(
+    "https://api.github.com/repos/awslabs/llrt/releases/latest"
+  );
+  const data: {
+    assets: {
+      url: string;
+      name: string;
+    }[];
+  } = await repoRes.json();
+
+  const correctVersion = data.assets.find(
+    (x) => x.name === "llrt-lambda-arm64.zip"
+  );
+  if (!correctVersion) {
+    error(
+      "Couldn't download the correct LLRT version, please set up Lack manually"
+    );
+    return;
+  }
+
+  const llrtBin = await fetch(correctVersion.url);
+  const blob = await llrtBin.blob();
+  await writeFile("./llrt.zip", Buffer.from(await blob.arrayBuffer()));
+  log("downloaded llrt");
+  log("generating config and gitignore");
+  await writeFile(".gitignore", sampleGitignore);
+  await writeFile("lack.config.js", sampleConfig);
+
+  await mkdir("./app");
+  log("done");
+}
 
 async function deploy() {
   const log = (text: string) => {
