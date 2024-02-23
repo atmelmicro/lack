@@ -46,8 +46,6 @@ async function newApp() {
   };
 
   log("creating new lack app");
-  log("initing npm");
-  spawn("npm", ["init", "-y"]);
 
   log("downloading llrt");
   const repoRes = await fetch(
@@ -55,7 +53,7 @@ async function newApp() {
   );
   const data: {
     assets: {
-      url: string;
+      browser_download_url: string;
       name: string;
     }[];
   } = await repoRes.json();
@@ -70,7 +68,7 @@ async function newApp() {
     return;
   }
 
-  const llrtBin = await fetch(correctVersion.url);
+  const llrtBin = await fetch(correctVersion.browser_download_url);
   const blob = await llrtBin.blob();
   await writeFile("./llrt.zip", Buffer.from(await blob.arrayBuffer()));
   log("downloaded llrt");
