@@ -47,7 +47,7 @@ async function newApp() {
 
   log("creating new lack app");
   log("initing npm");
-  spawn("npm", ["init -y"]);
+  spawn("npm", ["init", "-y"]);
 
   log("downloading llrt");
   const repoRes = await fetch(

@@ -16,7 +16,8 @@ export async function generateLambda() {
 export async function build() {
   const entries = await getAllEntryPoint("./app");
   // clear out folder
-  await rm("./out/", { recursive: true }).catch();
+  await rm("./out/", { recursive: true }).catch(() => {});
+  await mkdir("./out");
 
   await esbuild.build({
     entryPoints: entries,
