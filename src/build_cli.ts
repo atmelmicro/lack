@@ -8,7 +8,7 @@ if (typeof globalThis.require === "undefined") {
 }
 `;
 
-esbuild.build({
+await esbuild.build({
   entryPoints: ["./src/cli.ts"],
   bundle: true,
   outfile: "./build/cli.js",

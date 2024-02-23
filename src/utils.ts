@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import { extname } from "path";
+import { extname, resolve } from "path";
 
 export async function getAllEntryPoint(path: string): Promise<string[]> {
   const res = await readdir(path, { withFileTypes: true });
@@ -83,7 +83,7 @@ export async function getAllRoutes() {
   return (
     await Promise.all(
       entries.map((file) =>
-        import(file).then((functions) =>
+        import("file://" + resolve(file)).then((functions) =>
           Object.keys(functions).map((functionName) => {
             const path = file.slice(base.length, -extname(file).length);
             const fullPath = `${path}/${removeMethod(functionName)}`;
