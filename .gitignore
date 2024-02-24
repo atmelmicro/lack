@@ -8,3 +8,4 @@ deploy.js
 cli.js
 # npm is used only for testing, bun for everything 
 package-lock.json
+test/

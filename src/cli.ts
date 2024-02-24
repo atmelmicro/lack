@@ -2,8 +2,10 @@ import { bundleAll } from "./build";
 import { deploy as cdkDeploy } from "./deploy";
 import { argv } from "node:process";
 import { startDev } from "./dev";
-import { spawn } from "node:child_process";
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, watch } from "node:fs/promises";
+import { resolve } from "node:path";
+
+export type LogFunction = (...text: string[]) => void;
 
 const commands = [
   {
@@ -23,7 +25,7 @@ const commands = [
   {
     title: "dev",
     props: [],
-    fn: startDev,
+    fn: dev,
   },
   {
     title: "create",
@@ -39,6 +41,37 @@ export const llrt = "./llrt.zip"
 const sampleGitignore = `./llrt.zip
 out/
 node_modules/`;
+
+const debounce = 100;
+let lastTrigger = -Infinity;
+
+async function watchApp(log: LogFunction) {
+  const watcher = watch(resolve("./app"), { recursive: true });
+  for await (const event of watcher) {
+    if (lastTrigger + debounce > Date.now()) continue;
+    lastTrigger = Date.now();
+    const start = Date.now();
+    log("Rebuilding...");
+    await build();
+    log(`Rebuilt in ${Date.now() - start} ms`);
+  }
+}
+
+async function dev() {
+  const log = (...text: string[]) => {
+    console.log(
+      withHeading(
+        text.reduce((acc, x) => `${acc}${x}`, ""),
+        "Dev",
+        "Magenta"
+      )
+    );
+  };
+
+  await build();
+  watchApp(log);
+  await startDev(log);
+}
 
 async function newApp() {
   const log = (text: string) => {
