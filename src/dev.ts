@@ -1,19 +1,10 @@
 import { getAllRoutes } from "./utils";
 import { Hono } from "hono";
-import { withHeading } from "./cli";
+import { LogFunction } from "./cli";
 import { serve } from "@hono/node-server";
+import { resolve } from "path";
 
-function log(...text: string[]) {
-  console.log(
-    withHeading(
-      text.reduce((acc, x) => `${acc}${x}`, ""),
-      "Dev",
-      "Magenta",
-    ),
-  );
-}
-
-export async function startDev() {
+export async function startDev(log: LogFunction) {
   const routes = await getAllRoutes();
   log("Starting dev server");
   for (const route of routes) {
@@ -30,7 +21,7 @@ export async function startDev() {
     const path = routes.find(
       (x) =>
         x.matcher.test(url.pathname) &&
-        x.method === request.method.toLowerCase(),
+        x.method === request.method.toLowerCase()
     );
     log("got request at ", url.pathname);
     if (!path) return new Response("not found", { status: 404 });
@@ -46,7 +37,7 @@ export async function startDev() {
     }
     const event = { pathParameters, queryStringParameters: search };
 
-    const module = await import(path.file);
+    const module = await import("file://" + resolve(path.file));
     const res = await module[path.func](event);
     let { body, headers } = res;
 
