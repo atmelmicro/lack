@@ -6,15 +6,16 @@ import { writeFile, mkdir, watch } from "node:fs/promises";
 import { resolve } from "node:path";
 
 export type LogFunction = (...text: string[]) => void;
+export type Command = {
+  title: string;
+  props: { name: string; required: boolean; hasValue: boolean }[];
+  fn: () => any;
+};
 
-const commands = [
+const commands: Command[] = [
   {
     title: "deploy",
-    props: [
-      { name: "where", hasValue: true, required: true },
-      { name: "a", hasValue: true },
-      { name: "b", hasValue: false },
-    ],
+    props: [],
     fn: deploy,
   },
   {
@@ -32,6 +33,11 @@ const commands = [
     props: [],
     fn: newApp,
   },
+  {
+    title: "get-llrt",
+    props: [],
+    fn: getLlrt,
+  },
 ];
 
 const sampleConfig = `export const name = "example-app"
@@ -41,6 +47,41 @@ export const llrt = "./llrt.zip"
 const sampleGitignore = `./llrt.zip
 out/
 node_modules/`;
+
+const samplePackage = {
+  type: "module",
+  name: "example-app",
+  version: "0.1.0",
+  devDependencies: {
+    lackFrw: "^0.1.0",
+  },
+  scripts: {
+    dev: "lack-frw dev",
+    build: "lack-frw build",
+    deploy: "lack-frw deploy",
+  },
+};
+
+// copied from bun init - might need to change
+const sampleTsConfig = {
+  compilerOptions: {
+    lib: ["ESNext"],
+    target: "ESNext",
+    module: "ESNext",
+    moduleDetection: "force",
+    jsx: "react-jsx",
+    allowJs: true,
+
+    moduleResolution: "bundler",
+    allowImportingTsExtensions: true,
+    verbatimModuleSyntax: true,
+    noEmit: true,
+
+    strict: true,
+    skipLibCheck: true,
+    noFallthroughCasesInSwitch: true,
+  },
+};
 
 const debounce = 100;
 let lastTrigger = -Infinity;
@@ -73,12 +114,13 @@ async function dev() {
   await startDev(log);
 }
 
-async function newApp() {
+async function getLlrt() {
   const log = (text: string) => {
-    console.log(color(" Create ", "Gray"), text);
+    console.log(color(" Get LLRT ", "Blue"), text);
   };
 
-  log("creating new lack app");
+  const config = await import("file://" + resolve("./lack.config.js"));
+  const path = config.llrt ?? "llrt.zip";
 
   log("downloading llrt");
   const repoRes = await fetch(
@@ -103,11 +145,26 @@ async function newApp() {
 
   const llrtBin = await fetch(correctVersion.browser_download_url);
   const blob = await llrtBin.blob();
-  await writeFile("./llrt.zip", Buffer.from(await blob.arrayBuffer()));
+  await writeFile(path, Buffer.from(await blob.arrayBuffer()));
   log("downloaded llrt");
-  log("generating config and gitignore");
+}
+
+async function newApp() {
+  const log = (text: string) => {
+    console.log(color(" Create ", "Gray"), text);
+  };
+
+  await getLlrt();
+
+  log("creating new lack app");
+  log("generating config, gitignore, package.json and tsconfig");
   await writeFile(".gitignore", sampleGitignore);
   await writeFile("lack.config.js", sampleConfig);
+  await writeFile("package.json", JSON.stringify(samplePackage, undefined, 4));
+  await writeFile(
+    "tsconfig.json",
+    JSON.stringify(sampleTsConfig, undefined, 4)
+  );
 
   await mkdir("./app");
   log("done");
