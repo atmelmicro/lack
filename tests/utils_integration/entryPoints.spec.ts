@@ -2,13 +2,11 @@ import { expect, test } from "bun:test";
 import { getAllEntryPoint } from "../../src/utils";
 import { join } from "path";
 
-/*
-todo: this crashes on windows
 test("method and index", async () => {
-  console.log("aaaaaaaa", join(import.meta.dir, "./entryPoints"));
-  expect(
-    await getAllEntryPoint(
-      "C:\\Users\\David\\Documents\\lack\\tests\\utils_integration\\entryPoints"
+  const parentPath = join(import.meta.dir, "./entryPoints");
+  expect(await getAllEntryPoint(parentPath)).toEqual(
+    ["test.js", "nested/test2.js", "nested/deeper/test3.ts"].map((x) =>
+      join(parentPath, x)
     )
-  ).toEqual(["test.js", "nested/test2.js", "nested/deep/test.ts"]);
-});*/
+  );
+});

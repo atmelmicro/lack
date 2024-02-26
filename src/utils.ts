@@ -21,6 +21,7 @@ const methods = {
   pos$: "post",
   del$: "delete",
   put$: "put",
+  any$: "any",
 };
 
 export function removeMethod(funcName: string) {
@@ -35,8 +36,9 @@ export function cleanUpRoute(route: string) {
   const hasMethod =
     Object.keys(methods).find((x) => route.slice(0, 4) === x) !== undefined;
   if (hasMethod) route = route.slice(4);
-  if (route.endsWith("$index")) route = route.slice(0, -6);
-  return route.replaceAll("__", "/");
+  route = route.replaceAll("$index", "");
+  const fixedSlashes = route.replaceAll("__", "/");
+  return !fixedSlashes ? "/" : fixedSlashes; // never return an empty string, always add an slash
 }
 
 export function splitRoute(route: string) {
@@ -77,8 +79,7 @@ export function paramLocations(route: string) {
   return arr;
 }
 
-const base = "./out/build";
-export async function getAllRoutes() {
+export async function getAllRoutes(base: string) {
   const entries = await getAllEntryPoint(base);
   return (
     await Promise.all(

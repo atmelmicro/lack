@@ -18,12 +18,22 @@ test("underscores split paths", () => {
 
 test("index route", () => {
   const path = "$index";
-  expect(cleanUpRoute(path)).toBe("");
+  expect(cleanUpRoute(path)).toBe("/");
+});
+
+test("index route", () => {
+  const path = "$index__$index";
+  expect(cleanUpRoute(path)).toBe("/");
+});
+
+test("index route", () => {
+  const path = "$index$index";
+  expect(cleanUpRoute(path)).toBe("/");
 });
 
 test("index route with method", () => {
   const path = "put$$index";
-  expect(cleanUpRoute(path)).toBe("");
+  expect(cleanUpRoute(path)).toBe("/");
 });
 
 test("index route with non existant method", () => {

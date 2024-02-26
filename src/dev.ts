@@ -3,9 +3,10 @@ import { Hono } from "hono";
 import { LogFunction } from "./cli";
 import { serve } from "@hono/node-server";
 import { resolve } from "path";
+import { base } from "./consts";
 
 export async function startDev(log: LogFunction) {
-  const routes = await getAllRoutes();
+  const routes = await getAllRoutes(base);
   log("Starting dev server");
   for (const route of routes) {
     log("Registering route - ", route.lambdaMatcher);
@@ -21,7 +22,7 @@ export async function startDev(log: LogFunction) {
     const path = routes.find(
       (x) =>
         x.matcher.test(url.pathname) &&
-        x.method === request.method.toLowerCase()
+        (x.method === request.method.toLowerCase() || x.method === "any")
     );
     log("got request at ", url.pathname);
     if (!path) return new Response("not found", { status: 404 });
