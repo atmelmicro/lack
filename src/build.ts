@@ -2,12 +2,16 @@ import * as esbuild from "esbuild";
 import { getAllEntryPoint, getAllRoutes } from "./utils";
 import { mkdir, copyFile, rm } from "fs/promises";
 import { extname, join } from "path";
+import { base } from "./consts";
 
-const base = "./out/lambda";
+const lambdaBase = "./out/lambda";
 export async function generateLambda() {
   const routes = await getAllEntryPoint("./out/build");
   for (const route of routes) {
-    const folder = join(base, route.slice(base.length, -extname(route).length));
+    const folder = join(
+      lambdaBase,
+      route.slice(lambdaBase.length, -extname(route).length)
+    );
     await mkdir(folder, { recursive: true });
     copyFile(route, join(folder, "index.js"));
   }
@@ -32,7 +36,7 @@ export async function build() {
 
   const duplicates: string[] = [];
   const seen: string[] = [];
-  (await getAllRoutes())
+  (await getAllRoutes(base))
     .map((x) => x.method + "-" + x.lambdaMatcher)
     .forEach((x) => {
       if (seen.includes(x) && !duplicates.includes(x)) duplicates.push(x);

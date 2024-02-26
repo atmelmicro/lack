@@ -13,12 +13,14 @@ import {
 } from "aws-cdk-lib";
 import { getAllRoutes } from "./utils";
 import { join } from "path";
+import { base } from "./consts";
 
 const methods = {
   get: aws_apigatewayv2.HttpMethod.GET,
   post: aws_apigatewayv2.HttpMethod.POST,
   delete: aws_apigatewayv2.HttpMethod.DELETE,
   put: aws_apigatewayv2.HttpMethod.PUT,
+  any: aws_apigatewayv2.HttpMethod.ANY,
 };
 
 const random = () =>
@@ -111,7 +113,7 @@ export async function deploy() {
     environment: userObject?.env,
   };
 
-  const routes = await getAllRoutes();
+  const routes = await getAllRoutes(base);
   const lambdas: aws_lambda.Function[] = [];
   for (const route of routes) {
     const lambda = addRoute(
