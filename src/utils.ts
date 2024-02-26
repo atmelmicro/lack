@@ -79,11 +79,16 @@ export function paramLocations(route: string) {
   return arr;
 }
 
+const allowedExtentions = [".ts", ".js"];
+
 export async function getAllRoutes(base: string) {
   const entries = await getAllEntryPoint(base);
+  const filtered = entries.filter((x) =>
+    allowedExtentions.includes(extname(x))
+  );
   return (
     await Promise.all(
-      entries.map((file) =>
+      filtered.map((file) =>
         import("file://" + resolve(file)).then((functions) =>
           Object.keys(functions).map((functionName) => {
             const path = file.slice(base.length, -extname(file).length);
