@@ -23,9 +23,6 @@ const methods = {
   any: aws_apigatewayv2.HttpMethod.ANY,
 };
 
-const random = () =>
-  [...Array(5)].map(() => Math.random().toString(36)[2]).join("");
-
 export async function deploy() {
   const app = new App();
   const userCdk = await import(join(process.cwd(), "./lack.config.js"));
