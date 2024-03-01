@@ -1,6 +1,6 @@
 import { getAllRoutes } from "./utils";
 import { Hono } from "hono";
-import { LogFunction } from "./cli";
+import { LogFunction } from "./cli/parser";
 import { serve } from "@hono/node-server";
 import { resolve } from "path";
 import { base } from "./consts";
